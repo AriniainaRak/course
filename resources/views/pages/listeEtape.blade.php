@@ -1,5 +1,5 @@
 @extends('pages.layouts.userapp')
-@section('listeEtape')
+@section('etape')
 active
 @endsection
 @section('contenue')
@@ -22,8 +22,7 @@ active
                     <td>{{ $travaux->longueur }}</td>
                     <td>{{ $travaux->coureurs_per_equipe }}</td>
                     <td>{{ $travaux->rang }}</td>
-                    {{-- <td><a href="{{ route('detaillistedevis', ['idTypeMaison' => $travaux->idtype_maison]) }}">Detail</a> --}}
-                    </td>
+                    <td><a href="/etape_assignment">Assigner</a></td>
                 </tr>
                 @endforeach
             </tbody>

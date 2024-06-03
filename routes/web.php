@@ -19,8 +19,8 @@ Route::get('/', function () {
 });
 Route::get('/login', [MyController::class, 'login'])->name('login');
 Route::get('/loginadmin', [MyController::class, 'logAdmin'])->name('loginAdmin');
-Route::get('/loginutil', [MyController::class, 'loginUtil'])->name('loginUtil');
-Route::get('/logUtil', [MyController::class, 'logUtil'])->name('logUtil');
+Route::get('/loginEquipes', [MyController::class, 'loginEquipes'])->name('loginEquipes');
+Route::get('/logEquipes', [MyController::class, 'logEquipes'])->name('logEquipes');
 Route::get('/equipe/{access_token}', [MyController::class, 'accessViaToken'])->name('equipeaccessViaToken');
 Route::get('/', [MyController::class, 'dashboard'])->name('team.dashboard');
 Route::get('/admis', [MyController::class, 'admin'])->name('admin');
@@ -30,4 +30,4 @@ Route::get('/listeEtape', [MyController::class, 'listeEtape'])->name('listeEtape
 Route::get('/listeCoureur', [MyController::class, 'listeCoureur'])->name('listeCoureur');
 Route::get('/etape_assignment', [MyController::class, 'etape_assignment'])->name('etape_assignment');
 Route::get('/insert', [MyController::class, 'insert'])->name('insert');
-Route::post('/stockerChronos', [MyController::class, 'stockerChronos'])->name('stockerChronos');
+Route::get('/stockerChrono', [MyController::class, 'temps'])->name('temps');

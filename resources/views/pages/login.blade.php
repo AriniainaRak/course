@@ -68,7 +68,7 @@
                         @if (Session::has('fail'))
                             <div class="alert alert-danger">{{ Session::get('fail') }}</div>
                         @endif
-                        <form id="formAuthentication" class="mb-3" action="loginadmin" method="get">
+                        <form id="formAuthentication" class="mb-3" action="/loginadmin" method="get">
                             @csrf
                             <div class="mb-3">
                                 <label for="username" class="form-label">Email ou Nom Utilisateur</label>
@@ -94,7 +94,7 @@
 
                         <p class="text-center">
                             <span>Se connecter en tant que</span>
-                            <a href="/loginutil">
+                            <a href="/loginEquipes">
                                 <span>Equipe</span>
                             </a>
                         </p>

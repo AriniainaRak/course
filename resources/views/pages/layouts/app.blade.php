@@ -69,22 +69,28 @@
 
                 <ul class="menu-inner py-1">
                     <!-- Dashboard -->
-                     <li class="menu-item @yield('dash')">
+                     <li class="menu-item @yield('etape')">
                         <a href="/listeEtapes" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Liste Etape</div>
                         </a>
                     </li>
-                    <li class="menu-item @yield('dash')">
+                    <li class="menu-item @yield('coureur')">
                         <a href="/listeCoureur" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Liste Coureur</div>
                         </a>
                     </li>
-                    <li class="menu-item @yield('dash')">
+                    <li class="menu-item @yield('temps')">
                         <a href="/stockerChrono" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Temps coureur</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('general')">
+                        <a href="/stockerChrono" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Classement</div>
                         </a>
                     </li>
                 </ul>

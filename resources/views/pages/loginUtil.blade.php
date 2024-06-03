@@ -58,7 +58,7 @@
                         <!-- Logo -->
                         <div class="app-brand justify-content-center">
                             <a href="index.html" class="app-brand-link gap-2">
-                                <span class="app-brand-text demo text-body fw-bolder">Utilisateur</span>
+                                <span class="app-brand-text demo text-body fw-bolder">Equipes</span>
                             </a>
                         </div>
                         <!-- /Logo -->
@@ -68,7 +68,7 @@
                         @if (Session::has('fail'))
                             <div class="alert alert-danger">{{ Session::get('fail') }}</div>
                         @endif
-                        <form id="formAuthentication" class="mb-3" action="/logUtil" method="get">
+                        <form id="formAuthentication" class="mb-3" action="/logEquipes" method="get">
                             @csrf
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email or Nom d'Utilisateur</label>

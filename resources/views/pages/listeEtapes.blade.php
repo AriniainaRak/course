@@ -1,5 +1,5 @@
 @extends('pages.layouts.app')
-@section('listeEtape')
+@section('etape')
 active
 @endsection
 @section('contenue')

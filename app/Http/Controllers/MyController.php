@@ -25,7 +25,7 @@ class MyController extends Controller
         return view('pages/login');
     }
 
-    public function loginUtil()
+    public function loginEquipes()
     {
         return view('pages/loginUtil');
     }
@@ -49,7 +49,7 @@ class MyController extends Controller
         }
     }
 
-    public function logUtil(Request $request)
+    public function logEquipes(Request $request)
     {
         $request->validate([
             // 'email' => 'required',
@@ -58,15 +58,16 @@ class MyController extends Controller
         $user = Equipes::where('username', '=', $request->username)->first();
         if ($user) {
             if ($request->password == $user->password) {
+                // print($user);
                 # code...
-                if (Hash::check($request->password, $user->password)) {
-
-                    Session::put('loginId', $user->id);
+                if ($request->password == $user->password) {
+                    Session::put('EquipeId', $user->id);
                     // $data = [
                     //     'calendrier' => calendrier::all(),
                     //     'sport' => sport::all(),
                     //     'lieu' => lieu::all()
-                    // ];
+                    // ];\
+                    // print($user);
                     return view('pages/equipe');
                 }
             } else {
@@ -190,10 +191,11 @@ class MyController extends Controller
 
     public function etape_assignment()
     {
+        $teamId = Session::get('EquipeId');
         $data = [
             'etape_assignment' => Etape_assignments::all(),
             'etape' => Etapes::all(),
-            'coureur' => Coureurs::all()
+            'coureur' => Coureurs::where('idequipe','=',$teamId)->get()
         ];
         return view('pages.etape_assignment', compact('data'));
     }
@@ -218,6 +220,14 @@ class MyController extends Controller
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         return response()->json(['success' => 'Database reset successfully']);
+    }
+
+    public function temps(Request $request){
+        $data = [
+            'etape' => Etapes::all(),
+            'coureur' => Coureurs::all()
+        ];
+    return view('pages/chrono',compact('data'));
     }
 
     // public function stockerChronos(Request $request)

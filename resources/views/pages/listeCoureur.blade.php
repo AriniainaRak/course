@@ -1,5 +1,5 @@
 @extends('pages.layouts.app')
-@section('listeCoureur')
+@section('coureur')
 active
 @endsection
 @section('contenue')

@@ -8,7 +8,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Client</title>
+    <title>Equipes</title>
 
     <meta name="description" content="" />
 
@@ -70,16 +70,22 @@
                 <ul class="menu-inner py-1">
                     <!-- Dashboard -->
 
-                    <li class="menu-item @yield('newdevis')">
+                    <li class="menu-item @yield('etape')">
                         <a href="/listeEtape" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Liste Etape</div>
                         </a>
                     </li>
-                     <li class="menu-item @yield('newdevis')">
+                     <li class="menu-item @yield('affectation')">
                         <a href="/etape_assignment" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Affectation coureur</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('general')">
+                        <a href="/stockerChrono" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Classement</div>
                         </a>
                     </li>
                 </ul>
