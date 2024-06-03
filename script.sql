@@ -43,6 +43,14 @@ CREATE TABLE coureurs (
 insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Cristina', 13, 'F', '13-11-01', 1 );
 insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Mioty', 07, 'F', '13-07-01', 2 );
 
+CREATE TABLE etape_coureurs (
+    idetape INTEGER NOT NULL,
+    idcoureur INTEGER NOT NULL,
+    PRIMARY KEY (idetape, idcoureur),
+    FOREIGN KEY (idetape) REFERENCES etapes(id),
+    FOREIGN KEY (idcoureur) REFERENCES coureurs(id)
+);
+
 -- Table pour associer les coureurs aux catégories
 CREATE TABLE coureur_categories (
     idcoureur INT,
@@ -83,6 +91,17 @@ create table chronos(
     heure_arrive TIME,
     FOREIGN KEY (idetape) REFERENCES etapes(id),
     FOREIGN KEY (idcoureur) REFERENCES coureurs(id)
+);
+
+create table points (
+    id serial primary key not null,
+    classement int,
+    points int
+);
+
+create table genre(
+    id serial PRIMARY KEY NOT NULL,
+    name varchar(255)
 );
 
 -- Table pour les résultats

@@ -15,16 +15,22 @@ class Coureurs extends Model
         'name',
         'dossard_number',
         'gender',
-        'birth_date'
+        'birth_date',
+        'idequipe'
     ];
 
     public function equipe()
     {
-        return $this->hasMany(Equipes::class);
+        return $this->belongsTo(Equipes::class, 'idequipe');
     }
 
     public function etape_assignment()
     {
         return $this->hasManyThrough(Etape_assignments::class, Coureurs::class);
+    }
+
+    public function etapes()
+    {
+        return $this->belongsToMany(Etapes::class, 'etape_assignments', 'idcoureur', 'idetape');
     }
 }

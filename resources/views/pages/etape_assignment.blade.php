@@ -33,7 +33,7 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-            @foreach ($data['etape_assignment'] as $ech)
+            @foreach ($data['etape_assignments'] as $ech)
                 <tr>
                     <td>
                         @if ($ech->etape)

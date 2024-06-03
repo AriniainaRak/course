@@ -82,9 +82,15 @@
                         </a>
                     </li>
                     <li class="menu-item @yield('dash')">
-                        <a href="/stockerChrono" class="menu-link">
+                        <a href="/chrono" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Temps coureur</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/point" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Import points</div>
                         </a>
                     </li>
                 </ul>

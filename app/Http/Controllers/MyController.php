@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admins;
+use App\Models\Chronos;
 use App\Models\Coureurs;
 use App\Models\Equipes;
 use App\Models\Etape_assignments;
 use App\Models\Etapes;
+use App\Models\Points;
 // use App\Models\Chronos;
 // use Carbon\Carbon;
-use Illuminate\Support\Facades\Hash;
+use illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+// use Illuminate\Support\Str;
 // use Dompdf\Dompdf;
 // use Dompdf\Options;
 // use Illuminate\Support\Facades\Validator;
@@ -59,16 +63,8 @@ class MyController extends Controller
         if ($user) {
             if ($request->password == $user->password) {
                 # code...
-                if (Hash::check($request->password, $user->password)) {
-
-                    Session::put('loginId', $user->id);
-                    // $data = [
-                    //     'calendrier' => calendrier::all(),
-                    //     'sport' => sport::all(),
-                    //     'lieu' => lieu::all()
-                    // ];
-                    return view('pages/equipe');
-                }
+                Session::put('loginId', $user->id);
+                return view('pages/equipe');
             } else {
                 return back()->with('fail', 'Mot de passe incorrect');
             }
@@ -77,54 +73,6 @@ class MyController extends Controller
         }
     }
 
-    // Méthode pour gérer la connexion via le formulaire
-    // public function logUtil(Request $request)
-    // {
-    //     $request->validate([
-    //         'username' => 'required',
-    //         'password' => 'required'
-    //     ]);
-
-    //     $user = Equipes::where('username', $request->username)->first();
-
-    //     if ($user) {
-    //         if (Hash::check($request->password, $user->password)) {
-    //             // Set user session
-    //             Session::put('loginId', $user->id);
-    //             return view('pages/equipe');
-    //         } else {
-    //             return back()->with('fail', 'Mot de passe incorrect');
-    //         }
-    //     } else {
-    //         return back()->with('fail', 'Ce nom d’utilisateur n’est pas encore enregistré');
-    //     }
-    // }
-
-    // Méthode pour gérer l'accès via le token unique
-    public function accessViaToken($access_token)
-    {
-        $team = Equipes::where('access_token', $access_token)->first();
-
-        if ($team) {
-            // Enregistrez l'équipe dans la session
-            Session::put('loginId', $team->id);
-            return view('pages/equipe');
-        } else {
-            return redirect('/')->with('fail', 'Invalid access token.');
-        }
-    }
-
-    public function dashboard()
-    {
-        $teamId = Session::get('loginId');
-        $team = Equipes::find($teamId);
-
-        if ($team) {
-            return view('pages.equipe', compact('team'));
-        } else {
-            return redirect('/logiUtil')->with('fail', 'Please login first.');
-        }
-    }
 
     public function admin()
     {
@@ -180,6 +128,31 @@ class MyController extends Controller
         return view('pages/listeEtape', compact('data'));
     }
 
+    public function chrono()
+    {
+
+        // $etapeAssignments = Etapes::with('coureurs')->get();
+
+        // Debugging
+        // dd($etapeAssignments);
+
+
+        $data = [
+            'chrono' => Chronos::all(),
+            'etape' => Etapes::all(),
+            'coureur' => Coureurs::all()
+        ];
+        return view('pages/chrono', compact('data'));
+    }
+
+    public function point()
+    {
+        $data = [
+            'point' => Points::all()
+        ];
+        return view('pages/point', compact('data'));
+    }
+
     public function listeCoureur()
     {
         $data = [
@@ -191,7 +164,7 @@ class MyController extends Controller
     public function etape_assignment()
     {
         $data = [
-            'etape_assignment' => Etape_assignments::all(),
+            'etape_assignments' => Etape_assignments::all(),
             'etape' => Etapes::all(),
             'coureur' => Coureurs::all()
         ];
@@ -220,43 +193,128 @@ class MyController extends Controller
         return response()->json(['success' => 'Database reset successfully']);
     }
 
-    // public function stockerChronos(Request $request)
-    // {
-    //     $request->validate([
-    //         'idcoureur' => 'required',
-    //         'idetape' => 'required',
-    //         'heure_depart' => 'required|date_format:H:i:s', // Valide le format hh:mm:ss
-    //         'heure_arrivee' => 'required|date_format:H:i:s', // Valide le format hh:mm:ss
-    //     ]);
+    public function showChrono()
+    {
+        $etapeAssignments = Etapes::with('coureurs')->get();
+        return view('pages.chrono', ['etape_assignments' => $etapeAssignments]);
+    }
 
-    //     $coureurID = $request->input('idcoureur');
-    //     $etapeID = $request->input('idetape');
-    //     $heureDepart = $request->input('heure_depart');
-    //     $heureArrivee = $request->input('heure_arrivee');
+    public function showAffecterTempsForm($idetape, $idcoureur)
+    {
+        $etape = Etapes::find($idetape);
+        $coureur = Coureurs::find($idcoureur);
 
-    //     // Enregistrer le chrono dans la base de données
-    //     $chrono = new Chronos();
-    //     $chrono->coureur_id = $coureurID;
-    //     $chrono->etape_id = $etapeID;
-    //     $chrono->heure_depart = $heureDepart;
-    //     $chrono->heure_arrivee = $heureArrivee;
-    //     $chrono->save();
+        if (!$etape || !$coureur) {
+            return redirect()->back()->with('fail', 'Étape ou coureur non trouvé.');
+        }
 
-    //     // Récupérer les informations pour la session
-    //     $etape = Etapes::find($etapeID);
-    //     $coureur = Coureurs::find($coureurID);
-    //     $equipe = $coureur->equipe; // Assure-toi que le modèle Coureur a une relation définie avec Equipe
+        return view('pages.affecter-temps', compact('etape', 'coureur'));
+    }
 
-    //     // Stocker les informations dans la session
-    //     session([
-    //         'etape' => $etape,
-    //         'coureur' => $coureur,
-    //         'equipe' => $equipe,
-    //         'heure_depart' => $heureDepart,
-    //         'heure_arrivee' => $heureArrivee,
-    //     ]);
+    public function affecterTemps(Request $request)
+    {
+        $request->validate([
+            'idetape' => 'required|exists:etapes,id',
+            'idcoureur' => 'required|exists:coureurs,id',
+            'heure_depart' => 'required|date_format:H:i:s',
+            'heure_arrive' => 'required|date_format:H:i:s',
+        ]);
 
-    //     // Redirection avec un message de succès
-    //     return redirect()->back()->with('success', 'Chrono stocké avec succès.');
-    // }
+        // Debugging output to check received data
+        Log::info('Request Data:', $request->all());
+
+        // Mise à jour ou création de l'enregistrement Chronos
+        $temps = Chronos::updateOrCreate(
+            [
+                'idetape' => $request->idetape,
+                'idcoureur' => $request->idcoureur
+            ],
+            [
+                'heure_depart' => $request->heure_depart,
+                'heure_arrive' => $request->heure_arrive
+            ]
+        );
+
+        // Vérifier que l'opération a réussi
+        if ($temps) {
+            return redirect()->back()->with('success', 'Temps affecté avec succès.');
+        } else {
+            return redirect()->back()->with('fail', 'Échec de l\'affectation du temps.');
+        }
+    }
+
+    public function importPoint(Request $request)
+    {
+        // Vérifier si un fichier CSV a été envoyé
+        if ($request->hasFile('csv_file')) {
+            $file = $request->file('csv_file');
+
+            // Vérifier si le fichier est un CSV
+            if ($file->getClientOriginalExtension() === 'csv') {
+                // Récupérer le contenu du fichier CSV
+                $contents = file_get_contents($file->path());
+                $lines = explode("\n", $contents);
+
+                // Parcourir chaque ligne du CSV à partir de la deuxième ligne
+                for ($i = 1; $i < count($lines); $i++) {
+                    $line = $lines[$i];
+                    $data = explode(';', $line);
+
+                    // Vérifier si la ligne est valide
+                    if (count($data) === 2) {
+                        // Créer un nouvel enregistrement dans la table Points
+                        $point = new Points();
+                        $point->classement = $data[0];
+                        $point->points = $data[1];
+                        $point->save();
+                    }
+                }
+                return redirect()->back()->with('success', 'Importation CSV réussie.');
+            } else {
+                return redirect()->back()->with('error', 'Le fichier doit être au format CSV.');
+            }
+        }
+
+        return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
+    }
+
+    public function importEtape(Request $request)
+    {
+        // Vérifier si un fichier CSV a été envoyé
+        if ($request->hasFile('csv_file')) {
+            $file = $request->file('csv_file');
+
+            // Vérifier si le fichier est un CSV
+            if ($file->getClientOriginalExtension() === 'csv') {
+                // Récupérer le contenu du fichier CSV
+                $contents = file_get_contents($file->path());
+                $lines = explode("\n", $contents);
+
+                // Parcourir chaque ligne du CSV à partir de la deuxième ligne
+                for ($i = 1; $i < count($lines); $i++) {
+                    $line = $lines[$i];
+                    $data = explode(';', $line);
+
+                    // Vérifier si la ligne est valide
+                    if (count($data) === 2) {
+
+                        $longueur = (float)str_replace(',', '.', $data[1]);
+                        // Créer un nouvel enregistrement dans la table Points
+                        $etape = new Points();
+                        $etape->name = $data[0];
+                        $etape->longueur = $longueur;
+                        $etape->nbcoureur = $data[2];
+                        $etape->datedepart = $data[3];
+                        $etape->heure_depart = $data[4];
+                        $etape->save();
+                    }
+                }
+                return redirect()->back()->with('success', 'Importation CSV réussie.');
+            } else {
+                return redirect()->back()->with('error', 'Le fichier doit être au format CSV.');
+            }
+        }
+
+        return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
+    }
 }

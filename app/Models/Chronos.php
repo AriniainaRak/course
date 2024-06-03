@@ -17,4 +17,14 @@ class Chronos extends Model
         'heure_depart',
         'heure_arrive   '
     ];
+
+    public function etape()
+    {
+        return $this->belongsTo(Etapes::class, 'idetape');
+    }
+
+    public function coureur()
+    {
+        return $this->belongsTo(Coureurs::class, 'idcoureur');
+    }
 }

@@ -15,4 +15,14 @@ class Etape_assignments extends Model
         'idetape',
         'idcoureur'
     ];
+
+    public function etape()
+    {
+        return $this->belongsTo(Etapes::class, 'idetape');
+    }
+
+    public function coureur()
+    {
+        return $this->belongsTo(Coureurs::class, 'idcoureur');
+    }
 }
