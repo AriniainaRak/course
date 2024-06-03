@@ -224,8 +224,8 @@ class MyController extends Controller
 
     public function temps(Request $request){
         $data = [
-            'etape' => Etapes::all(),
-            'coureur' => Coureurs::all()
+            'etapes' => Etapes::all(),
+            'coureurs' => Coureurs::all()
         ];
     return view('pages/chrono',compact('data'));
     }

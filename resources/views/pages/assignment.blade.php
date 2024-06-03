@@ -22,6 +22,7 @@
                         @endforeach
                     </select>
                 </p>
+            </form>
         </div>
         <div class="table-responsive text-nowrap">
             <table class="table">

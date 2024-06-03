@@ -82,11 +82,25 @@
                             <div data-i18n="Analytics">Affectation coureur</div>
                         </a>
                     </li>
-                    <li class="menu-item @yield('general')">
-                        <a href="/stockerChrono" class="menu-link">
+                    <li class="menu-item" @yield('classe')>
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">Classement</div>
+                            <div data-i18n="Layouts">Classement</div>
                         </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @yield('general')">
+                                <a href="/stockerChrono" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                                    <div data-i18n="Analytics">Generale</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @yield('c_equipe')">
+                                <a href="/stockerChrono" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                                    <div data-i18n="Analytics">Par Equipe</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </aside>
