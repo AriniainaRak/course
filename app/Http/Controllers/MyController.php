@@ -54,26 +54,81 @@ class MyController extends Controller
         }
     }
 
+    // public function logUtil(Request $request)
+    // {
+    //     $request->validate([
+    //         // 'email' => 'required',
+    //         'password' => 'required'
+    //     ]);
+    //     $user = Equipes::where('username', '=', $request->username)->first();
+    //     if ($user) {
+    //         if ($request->password == $user->password) {
+    //             # code...
+    //             Session::put('loginId', $user->id);
+    //             return view('pages/equipe');
+    //         } else {
+    //             return back()->with('fail', 'Mot de passe incorrect');
+    //         }
+    //     } else {
+    //         return back()->with('fail', 'Cette Email n`est pas encore enregistrer');
+    //     }
+    // }
+
     public function logUtil(Request $request)
     {
         $request->validate([
-            // 'email' => 'required',
+            'username' => 'required',
             'password' => 'required'
         ]);
-        $user = Equipes::where('username', '=', $request->username)->first();
-        if ($user) {
-            if ($request->password == $user->password) {
-                # code...
-                Session::put('loginId', $user->id);
-                return view('pages/equipe');
+
+        $equipe = Equipes::where('username', '=', $request->username)->first();
+        if ($equipe) {
+            if ($request->password == $equipe->password) {
+                // Mettre l'ID de l'équipe dans la session pour identifier l'équipe connectée
+                Session::put('loginId', $equipe->id);
+                // Rediriger vers la page spécifique de l'équipe
+                return view('pages.equipe', ['id' => $equipe->id]);
             } else {
+                // Mot de passe incorrect
                 return back()->with('fail', 'Mot de passe incorrect');
             }
         } else {
-            return back()->with('fail', 'Cette Email n`est pas encore enregistrer');
+            // Nom d'utilisateur non trouvé
+            return back()->with('fail', 'Nom d\'utilisateur non trouvé');
         }
     }
 
+    // public function logUtil(Request $request)
+    // {
+    //     $request->validate([
+    //         'username' => 'required',
+    //         'password' => 'required'
+    //     ]);
+
+    //     $equipe = Equipes::where('username', $request->username)->first();
+
+    //     if ($equipe) {
+    //         if ($request->password == $equipe->password) {
+    //             Session::put('loginId', $equipe->id);
+    //             return redirect()->route('equipe.page', ['id' => $equipe->id]);
+    //         } else {
+    //             return back()->with('fail', 'Mot de passe incorrect');
+    //         }
+    //     } else {
+    //         return back()->with('fail', 'Nom d\'utilisateur non trouvé');
+    //     }
+    // }
+
+
+    // public function show($id)
+    // {
+    //     $equipe = Equipes::find($id);
+    //     if ($equipe) {
+    //         return view('pages.equipe', ['equipe' => $equipe]);
+    //     } else {
+    //         return redirect()->back()->with('fail', 'Équipe non trouvée');
+    //     }
+    // }
 
     public function admin()
     {
@@ -493,148 +548,4 @@ class MyController extends Controller
 
         return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
     }
-
-    // public function importResultat(Request $request)
-    // {
-    //     // Vérifier si un fichier CSV a été envoyé
-    //     if ($request->hasFile('csv_file')) {
-    //         $file = $request->file('csv_file');
-
-    //         // Vérifier si le fichier est un CSV
-    //         if ($file->getClientOriginalExtension() === 'csv') {
-    //             // Ouvrir le fichier en mode lecture
-    //             $handle = fopen($file->path(), 'r');
-
-    //             // Ignorer la première ligne (en-tête)
-    //             fgetcsv($handle, 0, ';');
-
-    //             // Lire les données restantes
-    //             while (($data = fgetcsv($handle, 0, ';')) !== false) {
-    //                 if (count($data) < 7) {
-    //                     Log::warning('Ligne invalide : ' . implode(';', $data));
-    //                     continue;
-    //                 }
-
-    //                 // Extraire les données de la ligne
-    //                 $etapeRang = (int)$data[0];
-    //                 $dossardNumber = (int)$data[1];
-    //                 $nom = $data[2];
-    //                 $genreName = $data[3];
-    //                 $birthDate = \DateTime::createFromFormat('d/m/Y', $data[4])->format('Y-m-d');
-    //                 $equipeName = $data[5];
-    //                 $arrivalTime = \DateTime::createFromFormat('d/m/Y H:i:s', $data[6])->format('Y-m-d H:i:s');
-
-    //                 // Vérifier ou créer le genre
-    //                 $genre = Genres::firstOrCreate(['name' => $genreName]);
-
-    //                 // Vérifier ou créer l'équipe
-    //                 $equipe = Equipes::firstOrCreate(['name' => $equipeName]);
-
-    //                 // Vérifier ou créer le coureur
-    //                 $coureur = Coureurs::firstOrCreate(
-    //                     ['dossard_number' => $dossardNumber],
-    //                     [
-    //                         'name' => $nom,
-    //                         'gender' => $genreName,
-    //                         'birth_date' => $birthDate,
-    //                         'idequipe' => $equipe->id
-    //                     ]
-    //                 );
-
-    //                 // Vérifier ou créer l'étape
-    //                 $etape = Etapes::firstOrCreate(
-    //                     ['rang' => $etapeRang],
-    //                     [
-    //                         'name' => 'Etape ' . $etapeRang, // Assuming a default name for now
-    //                         'longueur' => 0, // Placeholder, replace with actual value if available
-    //                         'coureurs_per_equipe' => 0, // Placeholder, replace with actual value if available
-    //                         'datedepart' => null, // Placeholder, replace with actual value if available
-    //                         'heure_depart' => null // Placeholder, replace with actual value if available
-    //                     ]
-    //                 );
-
-    //                 // Insérer le temps d'arrivée dans la table chronos
-    //                 Chronos::create([
-    //                     'idetape' => $etape->id,
-    //                     'idcoureur' => $coureur->id,
-    //                     'heure_arrivee' => $arrivalTime,
-    //                     // Add other relevant fields if necessary
-    //                 ]);
-
-    //                 // Log the inserted data
-    //                 Log::info('Données insérées : ', [
-    //                     'etape_rang' => $etapeRang,
-    //                     'dossard_number' => $dossardNumber,
-    //                     'nom' => $nom,
-    //                     'genre' => $genreName,
-    //                     'birth_date' => $birthDate,
-    //                     'equipe' => $equipeName,
-    //                     'arrival_time' => $arrivalTime,
-    //                 ]);
-    //             }
-
-    //             // Fermer le fichier
-    //             fclose($handle);
-
-    //             return redirect()->back()->with('success', 'Importation CSV réussie.');
-    //         } else {
-    //             return redirect()->back()->with('error', 'Le fichier doit être au format CSV.');
-    //         }
-    //     }
-
-    //     return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
-    // }
-
-    // public function importResultat(Request $request)
-    // {
-    //     // Vérifier si un fichier CSV a été envoyé
-    //     if ($request->hasFile('csv_file2')) {
-    //         $file = $request->file('csv_file2');
-
-    //         // Vérifier si le fichier est un CSV
-    //         if ($file->getClientOriginalExtension() === 'csv') {
-    //             // Récupérer le contenu du fichier CSV
-    //             $contents = file_get_contents($file->path());
-    //             $lines = explode("\n", $contents);
-
-    //             // Parcourir chaque ligne du CSV à partir de la deuxième ligne
-    //             for ($i = 1; $i < count($lines); $i++) {
-    //                 $line = $lines[$i];
-    //                 $data = explode(';', $line);
-
-    //                 // Vérifier si la ligne est valide pour la table Coureurs
-    //                 if (count($data) === 7) {
-    //                     // Vérifier et créer l'équipe si elle n'existe pas
-    //                     $equipe = Equipes::firstOrCreate(['name' => $data[5]]);
-
-    //                     // Vérifier et créer le genre si celui-ci n'existe pas
-    //                     $genre = Genres::firstOrCreate(['name' => $data[3]]);
-
-    //                     // Vérifier si le rang de l'étape existe dans la table Etapes
-    //                     $etape = Etapes::firstOrCreate(['rang' => $data[0]])->first();
-    //                     if ($etape) {
-    //                         // Créer un nouvel enregistrement dans la table Coureurs
-    //                         $coureur = new Coureurs();
-    //                         $coureur->idetape = $etape->id;
-    //                         $coureur->dossard_number = $data[1];
-    //                         $coureur->name = $data[2];
-    //                         $coureur->idgenre = $genre->id;
-    //                         $coureur->birth_date = $data[4];
-    //                         $coureur->idequipe = $equipe->id;
-    //                         $coureur->arrive = $data[6];
-    //                         $coureur->save();
-    //                     } else {
-    //                         return redirect()->back()->with('error', 'Le rang de l\'étape n\'existe pas.');
-    //                     }
-    //                 }
-    //             }
-
-    //             return redirect()->back()->with('success', 'Importation du deuxième fichier CSV réussie.');
-    //         } else {
-    //             return redirect()->back()->with('error', 'Le fichier 2 doit être au format CSV.');
-    //         }
-    //     }
-
-    //     return redirect()->back()->with('error', 'Aucun fichier 2 CSV n\'a été envoyé.');
-    // }
 }

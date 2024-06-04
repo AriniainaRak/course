@@ -39,3 +39,4 @@ Route::post('/importEtape', [MyController::class, 'importEtape'])->name('importE
 Route::post('/importResultat', [MyController::class, 'importResultat'])->name('importResultat');
 Route::get('/affecter-temps/{idetape}/{idcoureur}', [MyController::class, 'showAffecterTempsForm'])->name('showAffecterTempsForm');
 Route::post('/affecter-temps', [MyController::class, 'affecterTemps'])->name('affecterTemps');
+Route::get('/equipe/{id}', [MyController::class, 'show'])->name('equipe.page');
