@@ -1,4 +1,4 @@
--- Active: 1716373515129@@127.0.0.1@5432@course
+-- Active: 1717405712043@@127.0.0.1@5432@course
 -- Table pour les admins
 CREATE TABLE admins (
     id  SERIAL PRIMARY KEY,
@@ -45,10 +45,10 @@ CREATE TABLE coureurs (
     heure_arrive TIMESTAMP,
     FOREIGN KEY (idequipe) REFERENCES equipes(id),
     FOREIGN KEY (idetape) REFERENCES etapes(id),
-    FOREIGN KEY (idgender) REFERENCES genres(id)
+    FOREIGN KEY (idgender) REFERENCES genre(id)
 );
-insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Cristina', 13, 'F', '13-11-01', 1 );
-insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Mioty', 07, 'F', '13-07-01', 2 );
+insert into coureurs(name, dossard_number, idgender, birth_date, idequipe) values ('Cristina', 13, 1, '13-11-01', 1 );
+insert into coureurs(name, dossard_number, idgender, birth_date, idequipe) values ('Mioty', 07, 1, '13-07-01', 2 );
 
 CREATE TABLE etape_coureurs (
     idetape INTEGER NOT NULL,
