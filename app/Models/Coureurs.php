@@ -14,11 +14,9 @@ class Coureurs extends Model
     public $fillable = [
         'name',
         'dossard_number',
-        'gender',
+        'idgender',
         'birth_date',
-        'idequipe',
-        'idetape',
-        'heure_arrive'
+        'idequipe'
     ];
 
     public function equipe()
@@ -26,13 +24,18 @@ class Coureurs extends Model
         return $this->belongsTo(Equipes::class, 'idequipe');
     }
 
+    public function genre()
+    {
+        return $this->belongsTo(Genres::class, 'idgender');
+    }
+
     public function etape_assignment()
     {
-        return $this->hasManyThrough(Etape_assignments::class, Coureurs::class);
+        return $this->hasManyThrough(Etape_assignments::class, Etapes::class);
     }
 
     public function etapes()
     {
-        return $this->belongsToMany(Etapes::class, 'etape_assignments', 'idcoureur', 'idetape');
+        return $this->belongsToMany(Etapes::class, 'results', 'idcoureur', 'idetape');
     }
 }

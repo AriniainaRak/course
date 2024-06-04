@@ -5,23 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Etapes extends Model
+class Results extends Model
 {
     use HasFactory;
     protected $primaryKey = 'id';
-    protected $table = 'etapes';
+    protected $table = 'results';
     public $timestamps = false;
     public $fillable = [
-        'name',
-        'longueur',
-        'coureur_per_equipe',
-        'rang',
-        'datedepart',
-        'heure_depart'
+        'idetape',
+        'idcoureur',
+        'heure_arrive'
     ];
+
+    public function etape()
+    {
+        return $this->belongsTo(Etapes::class, 'idequipe');
+    }
 
     public function coureur()
     {
-        return $this->belongsToMany(Coureurs::class, 'results', 'idetape', 'idcoureur');
+        return $this->belongsTo(Coureurs::class, 'idequipe');
     }
 }

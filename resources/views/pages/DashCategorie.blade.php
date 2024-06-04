@@ -9,22 +9,23 @@ active
         <table class="table">
             <thead class="table-light">
                 <tr>
-                    <th>nom</th>
-                    <th>Longueur</th>
-                    <th>Nombre de coureur par equipe</th>
+                    <th>Etape</th>
+                    <th>Nom coureur</th>
+                    <th>Equipe</th>
                     <th>rang</th>
-                    <th>Voir classement</th>
+                    <th>Point</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
-                @foreach ($data['etapes'] as $travaux)
+                @foreach ($data['classement_generale'] as $travaux)
                 <tr>
-                    <td>{{ $travaux->name }}</td>
-                    <td>{{ $travaux->longueur }}</td>
-                    <td>{{ $travaux->coureurs_per_equipe }}</td>
+                    <td>{{ $travaux->nom_etape }}</td>
+                    <td>{{ $travaux->coureur_nom }}</td>
+                    <td>{{ $travaux->equipe_nom }}</td>
                     <td>{{ $travaux->rang }}</td>
-                    <td><a href="/DashEtape?idetape={{ $travaux->id }}">Voir classement</a></td>
-                    <td><a href="/etapepdf?idetape={{ $travaux->id }}">PDF</a></td>
+                    <td>{{ $travaux->points }}</td>
+                    {{-- <td><a href="{{ route('detaillistedevis', ['idTypeMaison' => $travaux->idtype_maison]) }}">Detail</a> --}}
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

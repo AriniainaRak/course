@@ -76,33 +76,45 @@
                         </a>
                     </li>
                     <li class="menu-item @yield('dash')">
-                        <a href="/listeCoureur" class="menu-link">
+                        <a href="/listeCategorie" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">Liste Coureur</div>
+                            <div data-i18n="Analytics">Liste Categorie</div>
                         </a>
                     </li>
-                    <li class="menu-item @yield('dash')">
+                    {{-- <li class="menu-item @yield('dash')">
                         <a href="/chrono" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Temps coureur</div>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="menu-item @yield('dash')">
                         <a href="/point" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Import points</div>
                         </a>
                     </li>
-                    <li class="menu-item @yield('dash')">
+                    {{-- <li class="menu-item @yield('dash')">
                         <a href="/import" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Import etapes</div>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="menu-item @yield('dash')">
                         <a href="/importresult" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">Import resultats</div>
+                            <div data-i18n="Analytics">Import etapes et resultats</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/listepenalty" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Ajout penalité</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/classement_general" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Classement generale</div>
                         </a>
                     </li>
                 </ul>

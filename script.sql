@@ -41,10 +41,7 @@ CREATE TABLE coureurs (
     idgender int,
     birth_date DATE NOT NULL,
     idequipe INT,
-    idetape int,
-    heure_arrive TIMESTAMP,
     FOREIGN KEY (idequipe) REFERENCES equipes(id),
-    FOREIGN KEY (idetape) REFERENCES etapes(id),
     FOREIGN KEY (idgender) REFERENCES genres(id)
 );
 insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Cristina', 13, 'F', '13-11-01', 1 );
@@ -116,21 +113,165 @@ create table genre(
 -- Table pour les résultats
 CREATE TABLE results (
     id SERIAL PRIMARY KEY,
-    idetape_assignment INT,
-    points INT,
-    penalty_time TIME,
-    FOREIGN KEY (idetape_assignment) REFERENCES etape_assignments(id)
+    idetape INT,
+    idcoureur INT,
+    heure_arrive timestamp,
+    FOREIGN KEY (idetape) REFERENCES etapes(id),
+    FOREIGN KEY (idcoureur) REFERENCES coureurs(id)
 );
 
 -- Table pour les pénalités (si nécessaire)
-CREATE TABLE penalties (
+CREATE TABLE penalities (
     id SERIAL PRIMARY KEY,
-    idetape_assignment INT,
-    penalty_description VARCHAR(255),
-    penalty_time TIME,
-    FOREIGN KEY (idetape_assignment) REFERENCES etape_assignments(id)
+    idetape INT,
+    idequipe int,
+    penalty TIME,
+    FOREIGN KEY (idetape) REFERENCES etapes(id),
+    FOREIGN KEY (idequipe) REFERENCES equipes(id)
 );
 
+create table classements(
+    id serial primary key not null,
+    idcoureur int,
+    classement int,
+    idetape int,
+    foreign key (idcoureur) coureurs(id),
+    foreign key (idetape) etapes(id)
+);
+
+drop view detail_resultat;
+create or replace view detail_resultat as
+select
+e.*,
+r.heure_arrive,
+c.name as name_coureur,c.dossard_number,c.idequipe,eq.name as name_equipe
+from results r
+join etapes e on e.id = r.idetape
+join coureurs c on r.idcoureur = c.id
+join equipes eq on c.idequipe = eq.id;
+
+SELECT
+    id,
+    name_coureur,
+    name as etape,
+    name_equipe,
+    longueur,
+    datedepart,
+    heure_depart,
+    heure_arrive,
+    dossard_number,
+    heure_arrive - (datedepart + heure_depart::time) AS temps_ecoule
+FROM
+    detail_resultat
+order by temps_ecoule;
+
+
+SELECT
+    id,
+    name,
+    longueur,
+    coureurs_per_equipe,
+    rang,
+    datedepart,
+    heure_depart,
+    heure_arrive,
+    name_coureur,
+    dossard_number,
+    heure_arrive - (datedepart + heure_depart::time) AS temps_ecoule,
+    DENSE_RANK() OVER (ORDER BY heure_arrive - (datedepart + heure_depart::time)) AS rang_coureur
+FROM
+    detail_resultat
+ORDER BY
+    temps_ecoule;
+
+
+
+drop view  classement;
+create or replace view classement as
+SELECT
+    id,
+    ROW_NUMBER() OVER (PARTITION BY id ORDER BY heure_arrive - (datedepart + heure_depart::time)) AS rang,
+    name_coureur,
+    name_equipe,
+    dossard_number,
+    name as etape,
+    datedepart,
+    heure_depart,
+    heure_arrive,
+    heure_arrive - (datedepart + heure_depart::time) AS temps_ecoule,
+    DENSE_RANK() OVER (ORDER BY heure_arrive - (datedepart + heure_depart::time)) AS rang_coureur
+FROM
+    detail_resultat
+ORDER BY
+    id, rang;
+
+create or replace view classement_point as
+SELECT
+    c.id,
+    c.rang,
+    c.name_coureur,
+    c.name_equipe,
+    c.dossard_number,
+    c.etape,
+    c.datedepart,
+    c.heure_depart,
+    c.heure_arrive,
+    c.temps_ecoule,
+    COALESCE(p.points, 0) AS points
+FROM
+    classement c
+LEFT JOIN
+    points p ON c.rang = p.classement
+ORDER BY
+    c.id, c.rang;
+
+-- classement generale par equipe
+create or replace view classement_equipe as
+SELECT
+    equipe_nom,
+    SUM(points) AS total_points
+FROM
+    classement_generale
+GROUP BY
+    equipe_nom
+ORDER BY
+    total_points DESC;
+
+-- classement par equipe homme
+create or replace view homme_rang as
+SELECT
+    equipe_nom,
+    SUM(points) AS total_points
+FROM
+    classement_homme
+GROUP BY
+    equipe_nom
+ORDER BY
+    total_points DESC;
+
+-- classement par equipe femme
+create or replace view femme_rang as
+SELECT
+    equipe_nom,
+    SUM(points) AS total_points
+FROM
+    classement_femme
+GROUP BY
+    equipe_nom
+ORDER BY
+    total_points DESC;
+
+-- classement par equipe junior
+create or replace view junior_rang as
+SELECT
+    equipe_nom,
+    SUM(points) AS total_points
+FROM
+    classement_junior
+GROUP BY
+    equipe_nom
+ORDER BY
+    total_points DESC;
 
 
 
@@ -138,6 +279,266 @@ CREATE TABLE penalties (
 
 
 
+
+
+
+
+CREATE OR REPLACE VIEW course_detail AS
+WITH rang_coureur AS (
+    SELECT
+        r.id AS id_resultat,
+        e.id AS idetape,
+        e.name AS etape,
+        e.datedepart,
+        e.heure_depart AS heure_de_depart,
+        e.longueur AS longueur_km,
+        r.heure_arrive,
+        -- r.chrono,
+        c.id AS idcoureur,
+        c.name AS coureur_nom,
+        c.idgender AS id_category,
+        g.name AS category_nom,
+        eq.id AS id_equipe,
+        eq.name AS equipe_nom,
+        (r.heure_arrive - (e.datedepart + e.heure_depart::time)) AS temps_parcours,
+        DENSE_RANK() OVER (PARTITION BY e.id ORDER BY (r.heure_arrive - (e.datedepart + e.heure_depart::time))) AS rang
+    FROM
+        results r
+        JOIN etapes e ON r.idetape = e.id
+        JOIN coureurs c ON r.idcoureur = c.id
+        JOIN genres g ON c.idgender = g.id
+        JOIN equipes eq ON c.idequipe = eq.id
+)
+SELECT * FROM rang_coureur;
+
+
+create or replace VIEW classement_generale as
+SELECT
+    rc.id_resultat,
+    rc.idetape,
+    rc.etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.heure_arrive,
+    -- rc.chrono,
+    rc.idcoureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+FROM course_detail rc
+LEFT JOIN points p ON p.classement = rc.rang
+ORDER BY rc.idetape, rc.rang;
+
+
+
+CREATE OR REPLACE VIEW course_detail_homme AS
+    SELECT
+        r.id AS id_resultat,
+        e.id AS id_etape,
+        e.name AS nom_etape,
+        e.datedepart,
+        e.heure_depart AS heure_de_depart,
+        e.longueur AS longueur_km,
+        r.heure_arrive,
+        -- r.chrono,
+        c.id AS id_coureur,
+        c.name AS coureur_nom,
+        c.idgender AS id_category,
+        g.name AS category_nom,  -- Correction: Utilisation de la colonne 'genre' de la table 'genres'
+        eq.id AS id_equipe,
+        eq.name AS equipe_nom,
+        (r.heure_arrive - (e.datedepart + e.heure_depart)) AS temps_parcours,
+        DENSE_RANK() OVER (PARTITION BY e.id ORDER BY (r.heure_arrive - (e.datedepart + e.heure_depart))) AS rang
+        -- COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+    FROM
+        results r
+        JOIN etapes e ON r.idetape = e.id
+        JOIN coureurs c ON r.idcoureur = c.id
+        JOIN genres g ON c.idgender = g.id
+        JOIN equipes eq ON c.idequipe = eq.id
+        -- LEFT JOIN points p ON p.classement = rc.rang
+    WHERE
+        g.name = 'M';
+
+drop view classement_homme;
+create or replace view classement_homme as
+SELECT
+    rc.id_resultat,
+    rc.id_etape,
+    rc.nom_etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.heure_arrive,
+    -- rc.chrono,
+    rc.id_coureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+FROM course_detail_homme rc
+LEFT JOIN points p ON p.classement = rc.rang
+ORDER BY rc.id_etape, rc.rang;
+
+SELECT
+    rc.id_resultat,
+    rc.id_etape,
+    rc.nom_etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.arrivee,
+    rc.chrono,
+    rc.id_coureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.point, 0) AS points
+FROM
+    rang_coureur rc
+LEFT JOIN
+    points p ON p.classement = rc.rang;
+
+
+CREATE OR REPLACE VIEW course_detail_femme AS
+    SELECT
+        r.id AS id_resultat,
+        e.id AS id_etape,
+        e.name AS nom_etape,
+        e.datedepart,
+        e.heure_depart AS heure_de_depart,
+        e.longueur AS longueur_km,
+        r.heure_arrive,
+        -- r.chrono,
+        c.id AS id_coureur,
+        c.name AS coureur_nom,
+        c.idgender AS id_category,
+        g.name AS category_nom,  -- Correction: Utilisation de la colonne 'genre' de la table 'genres'
+        eq.id AS id_equipe,
+        eq.name AS equipe_nom,
+        (r.heure_arrive - (e.datedepart + e.heure_depart)) AS temps_parcours,
+        DENSE_RANK() OVER (PARTITION BY e.id ORDER BY (r.heure_arrive - (e.datedepart + e.heure_depart))) AS rang
+        -- COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+    FROM
+        results r
+        JOIN etapes e ON r.idetape = e.id
+        JOIN coureurs c ON r.idcoureur = c.id
+        JOIN genres g ON c.idgender = g.id
+        JOIN equipes eq ON c.idequipe = eq.id
+        -- LEFT JOIN points p ON p.classement = rc.rang
+    WHERE
+        g.name = 'F';
+
+create or replace view classement_femme as
+SELECT
+    rc.id_resultat,
+    rc.id_etape,
+    rc.nom_etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.heure_arrive,
+    -- rc.chrono,
+    rc.id_coureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+FROM course_detail_femme rc
+LEFT JOIN points p ON p.classement = rc.rang
+ORDER BY rc.id_etape, rc.rang;
+
+
+SELECT
+    rc.id_resultat,
+    rc.id_etape,
+    rc.nom_etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.arrivee,
+    rc.chrono,
+    rc.id_coureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.point, 0) AS points
+FROM
+    course_detail rc
+LEFT JOIN
+    points p ON p.classement = rc.rang;
+
+
+CREATE OR REPLACE VIEW course_detail_junior AS
+    SELECT
+        r.id AS id_resultat,
+        e.id AS id_etape,
+        e.name AS nom_etape,
+        e.datedepart,
+        e.heure_depart AS heure_de_depart,
+        e.longueur AS longueur_km,
+        r.heure_arrive,
+        c.id AS id_coureur,
+        c.name AS coureur_nom,
+        c.birth_date,
+        c.idgender AS id_category,
+        g.name AS category_nom,  -- Correction: Utilisation de la colonne 'nom' de la table 'categories'
+        eq.id AS id_equipe,
+        eq.name AS equipe_nom,
+        (r.heure_arrive - (e.datedepart + e.heure_depart)) AS temps_parcours,
+        DENSE_RANK() OVER (PARTITION BY e.id ORDER BY (r.heure_arrive - (e.datedepart + e.heure_depart))) AS rang
+    FROM
+        results r
+        JOIN etapes e ON r.idetape = e.id
+        JOIN coureurs c ON r.idcoureur = c.id
+        JOIN categories g ON c.idgender = g.id  -- Correction: Utilisation de la table 'categories'
+        JOIN equipes eq ON c.idequipe = eq.id
+    WHERE
+        age(e.datedepart, c.birth_date) <= INTERVAL '18 years';  -- Correction: Utilisation de la colonne 'nom' de la table 'categories'
+CREATE OR REPLACE VIEW classement_junior as
+SELECT
+    rc.id_resultat,
+    rc.id_etape,
+    rc.nom_etape,
+    rc.datedepart,
+    rc.heure_de_depart,
+    rc.longueur_km,
+    rc.heure_arrive,
+    -- rc.chrono,
+    rc.id_coureur,
+    rc.coureur_nom,
+    rc.id_category,
+    rc.category_nom,
+    rc.id_equipe,
+    rc.equipe_nom,
+    rc.temps_parcours,
+    rc.rang,
+    COALESCE(p.points, 0) AS points  -- Vérifiez que "points" est le bon nom de colonne
+FROM course_detail_junior rc
+LEFT JOIN points p ON p.classement = rc.rang
+ORDER BY rc.id_etape, rc.rang;
 
 
 

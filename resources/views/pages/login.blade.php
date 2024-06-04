@@ -106,6 +106,11 @@
     </div>
 
     <!-- / Content -->
+<div class="buy-now">
+        <a href="/resetdb" class="btn btn-danger btn-buy-now">Reset database</a>
+    </div>
+
+
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
