@@ -15,8 +15,11 @@ CREATE TABLE equipes (
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
-insert into equipes(name, username, password) values ('Ankoay', 'Arinirina', 12345);
-insert into equipes(name, username, password) values ('Vorona', 'Ariniaina', 12345);
+insert into equipes(name, username, password) values ('A', 'Arinirina', 12345);
+insert into equipes(name, username, password) values ('B', 'Ariniaina', 12345);
+insert into equipes(name, username, password) values ('D', 'Arimalala', 12345);
+insert into equipes(name, username, password) values ('E', 'Ambinintsoa', 12345);
+insert into equipes(name, username, password) values ('C', 'Arison', 12345);
 
 -- Table pour les catégories
 CREATE TABLE categories (
@@ -34,11 +37,15 @@ insert into categories(name) values ('junior');
 CREATE TABLE coureurs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    dossard_number INT NOT NULL UNIQUE,
-    gender varchar(255) NOT NULL,
+    dossard_number INT NOT NULL,
+    idgender int,
     birth_date DATE NOT NULL,
     idequipe INT,
-    FOREIGN KEY (idequipe) REFERENCES equipes(id)
+    idetape int,
+    heure_arrive TIMESTAMP,
+    FOREIGN KEY (idequipe) REFERENCES equipes(id),
+    FOREIGN KEY (idetape) REFERENCES etapes(id),
+    FOREIGN KEY (idgender) REFERENCES genres(id)
 );
 insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Cristina', 13, 'F', '13-11-01', 1 );
 insert into coureurs(name, dossard_number, gender, birth_date, idequipe) values ('Mioty', 07, 'F', '13-07-01', 2 );
@@ -66,7 +73,9 @@ CREATE TABLE etapes (
     name VARCHAR(255) NOT NULL,
     longueur DECIMAL(5, 2) NOT NULL,
     coureurs_per_equipe INT NOT NULL,
-    rang INT NOT NULL
+    rang INT NOT NULL,
+    datedepart date,
+    heure_depart time
 );
 insert into etapes(name, longueur, coureurs_per_equipe, rang) values ('Anosy-67Ha', 10, 2, 1);
 

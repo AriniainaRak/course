@@ -16,7 +16,9 @@ class Coureurs extends Model
         'dossard_number',
         'gender',
         'birth_date',
-        'idequipe'
+        'idequipe',
+        'idetape',
+        'heure_arrive'
     ];
 
     public function equipe()

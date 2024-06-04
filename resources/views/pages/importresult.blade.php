@@ -2,12 +2,12 @@
 @section('import')
     active open
 @endsection
-@section('import')
+@section('importResultat')
     active
 @endsection
 @section('contenue')
     <div class="card">
-        <h5 class="card-header">Etape</h5>
+        <h5 class="card-header">Resultat</h5>
         @if (Session::has('fail'))
             <div class="alert alert-danger">{{ Session::get('fail') }}</div>
         @endif
@@ -15,10 +15,10 @@
             <div class="alert alert-success">{{ Session::get('success') }}</div>
         @endif
         <div class="table-responsive text-nowrap">
-            <form action="/importEtape" method="post" enctype="multipart/form-data">
+            <form action="/importResultat" method="post" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="table" value="etapes">
-                <p><input type="file" name="csv_file" id="data">CSV</p>
+                <input type="hidden" name="table" value="coureurs">
+                <p><input type="file" name="csv_file2" id="data">CSV</p>
                 <p><button type="submit" class="btn btn-dark">Importer</button></p>
                 @if (Session::has('csvsuccess'))
                     <div class="alert alert-success">{{ Session::get('csvsuccess') }}</div>

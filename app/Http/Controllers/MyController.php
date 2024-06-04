@@ -9,6 +9,7 @@ use App\Models\Equipes;
 use App\Models\Etape_assignments;
 use App\Models\Etapes;
 use App\Models\Points;
+use App\Models\Genres;
 // use App\Models\Chronos;
 // use Carbon\Carbon;
 use illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ use illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-// use Illuminate\Support\Str;
+use Illuminate\Support\Str;
 // use Dompdf\Dompdf;
 // use Dompdf\Options;
 // use Illuminate\Support\Facades\Validator;
@@ -151,6 +152,26 @@ class MyController extends Controller
             'point' => Points::all()
         ];
         return view('pages/point', compact('data'));
+    }
+
+    public function import()
+    {
+        $data = [
+            'coureur' => Coureurs::all(),
+            'etape' => Etapes::all(),
+            'genre' => Genres::all()
+        ];
+        return view('pages/import', compact('data'));
+    }
+
+    public function importresult()
+    {
+        $data = [
+            'coureur' => Coureurs::all(),
+            'etape' => Etapes::all(),
+            'genre' => Genres::all()
+        ];
+        return view('pages/importresult', compact('data'));
     }
 
     public function listeCoureur()
@@ -293,22 +314,43 @@ class MyController extends Controller
                 // Parcourir chaque ligne du CSV à partir de la deuxième ligne
                 for ($i = 1; $i < count($lines); $i++) {
                     $line = $lines[$i];
-                    $data = explode(';', $line);
+                    $data = str_getcsv($line, ';');
 
                     // Vérifier si la ligne est valide
-                    if (count($data) === 2) {
+                    if (count($data) >= 6) {
+                        try {
+                            $longueur = (float)str_replace(',', '.', $data[1]);
+                            $dateDepart = \DateTime::createFromFormat('d/m/Y', $data[4]);
+                            $heureDepart = \DateTime::createFromFormat('H:i:s', $data[5]);
 
-                        $longueur = (float)str_replace(',', '.', $data[1]);
-                        // Créer un nouvel enregistrement dans la table Points
-                        $etape = new Points();
-                        $etape->name = $data[0];
-                        $etape->longueur = $longueur;
-                        $etape->nbcoureur = $data[2];
-                        $etape->datedepart = $data[3];
-                        $etape->heure_depart = $data[4];
-                        $etape->save();
+                            // Créer un nouvel enregistrement dans la table Etape
+                            $etape = new Etapes();
+                            $etape->name = $data[0];
+                            $etape->longueur = $longueur;
+                            $etape->coureurs_per_equipe = (int)$data[2];
+                            $etape->rang = (int)$data[3];
+                            $etape->datedepart = $dateDepart ? $dateDepart->format('Y-m-d') : null;
+                            $etape->heure_depart = $heureDepart ? $heureDepart->format('H:i:s') : null;
+
+                            // Journaliser les données avant de les enregistrer
+                            Log::info('Insertion des données : ', [
+                                'name' => $etape->name,
+                                'longueur' => $etape->longueur,
+                                'coureurs_per_equipe' => $etape->coureurs_per_equipe,
+                                'rang' => $etape->rang,
+                                'datedepart' => $etape->datedepart,
+                                'heure_depart' => $etape->heure_depart,
+                            ]);
+
+                            $etape->save();
+                        } catch (\Exception $e) {
+                            Log::error('Erreur lors de l\'importation de la ligne : ' . $line . ' - ' . $e->getMessage());
+                        }
+                    } else {
+                        Log::warning('Ligne invalide : ' . $line);
                     }
                 }
+
                 return redirect()->back()->with('success', 'Importation CSV réussie.');
             } else {
                 return redirect()->back()->with('error', 'Le fichier doit être au format CSV.');
@@ -317,4 +359,282 @@ class MyController extends Controller
 
         return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
     }
+
+    // mande fa 2 premier ligne iany no insereny de tsy insereny daoly
+    // public function importResultat(Request $request)
+    // {
+    //     // Vérifier si un fichier CSV a été envoyé
+    //     if ($request->hasFile('csv_file2')) {
+    //         $file = $request->file('csv_file2');
+
+    //         // Vérifier si le fichier est un CSV
+    //         if ($file->getClientOriginalExtension() === 'csv') {
+    //             // Ouvrir le fichier en mode lecture
+    //             $handle = fopen($file->path(), 'r');
+
+    //             // Ignorer la première ligne (en-tête)
+    //             fgetcsv($handle, 0, ';');
+
+    //             // Lire les données restantes
+    //             while (($data = fgetcsv($handle, 0, ';')) !== false) {
+    //                 if (count($data) < 7) {
+    //                     Log::warning('Ligne invalide : ' . implode(';', $data));
+    //                     continue;
+    //                 }
+
+    //                 // Vérifier ou créer l'équipe avec des valeurs par défaut pour username et password
+    //                 $equipe = Equipes::firstOrCreate(
+    //                     ['name' => $data[5]],
+    //                     [
+    //                         'username' => Str::slug($data[5]) . '_user', // Nom d'utilisateur par défaut
+    //                         'password' => bcrypt('default_password') // Mot de passe par défaut chiffré
+    //                     ]
+    //                 );
+
+    //                 // Vérifier ou créer le genre
+    //                 $genre = Genres::firstOrCreate(['name' => $data[3]]);
+
+    //                 // Vérifier ou créer l'étape
+    //                 $etape = Etapes::firstOrCreate(
+    //                     ['rang' => $data[0]],
+    //                     [
+    //                         'name' => 'Etape ' . $data[0], // Nom par défaut
+    //                         'longueur' => 0, // Valeur par défaut
+    //                         'coureurs_per_equipe' => 0, // Valeur par défaut
+    //                         'datedepart' => null, // Valeur par défaut
+    //                         'heure_depart' => null // Valeur par défaut
+    //                     ]
+    //                 );
+
+    //                 // Créer ou mettre à jour le coureur
+    //                 $coureur = Coureurs::updateOrCreate(
+    //                     ['dossard_number' => $data[1]],
+    //                     [
+    //                         'name' => $data[2],
+    //                         'idgenre' => $genre->id,
+    //                         'birth_date' => \DateTime::createFromFormat('d/m/Y', $data[4])->format('Y-m-d'),
+    //                         'idequipe' => $equipe->id
+    //                     ]
+    //                 );
+
+    //                 // Insérer le temps d'arrivée dans la table Chronos
+    //                 Chronos::create([
+    //                     'idetape' => $etape->id,
+    //                     'idcoureur' => $coureur->id,
+    //                     'heure_arrivee' => \DateTime::createFromFormat('d/m/Y H:i:s', $data[6])->format('Y-m-d H:i:s')
+    //                 ]);
+
+    //                 // Log the inserted data
+    //                 Log::info('Données insérées : ', [
+    //                     'etape_rang' => $data[0],
+    //                     'dossard_number' => $data[1],
+    //                     'nom' => $data[2],
+    //                     'genre' => $data[3],
+    //                     'birth_date' => $data[4],
+    //                     'equipe' => $data[5],
+    //                     'arrival_time' => $data[6],
+    //                 ]);
+    //             }
+
+    //             // Fermer le fichier
+    //             fclose($handle);
+
+    //             return redirect()->back()->with('success', 'Importation du deuxième fichier CSV réussie.');
+    //         } else {
+    //             return redirect()->back()->with('error', 'Le fichier 2 doit être au format CSV.');
+    //         }
+    //     }
+
+    //     return redirect()->back()->with('error', 'Aucun fichier 2 CSV n\'a été envoyé.');
+    // }
+
+    public function importResultat(Request $request)
+    {
+        // Vérifier si un fichier CSV a été envoyé
+        if ($request->hasFile('csv_file2')) {
+            $filePath = $request->file('csv_file2')->path();
+
+            // Lire le contenu du fichier CSV
+            $contents = file_get_contents($filePath);
+            $lines = explode("\n", $contents);
+
+            // Parcourir chaque ligne du CSV à partir de la deuxième ligne
+            for ($i = 1; $i < count($lines); $i++) {
+                $line = $lines[$i];
+                $data = explode(';', $line);
+
+                // Vérifier si la ligne est valide pour chaque table
+                if (count($data) === 7) {
+                    // Vérifier et créer l'équipe si elle n'existe pas
+                    $equipe = Equipes::firstOrCreate(['name' => $data[5]]);
+
+                    // Vérifier et créer le genre si celui-ci n'existe pas
+                    $genre = Genres::firstOrCreate(['name' => $data[3]]);
+
+                    // Vérifier si le rang de l'étape existe dans la table Etapes
+                    $etape = Etapes::firstOrCreate(['rang' => $data[0]]);
+                    if ($etape) {
+                        // Créer un nouvel enregistrement dans la table Coureurs
+                        $coureur = new Coureurs();
+                        $coureur->name = $data[2];
+                        $coureur->dossard_number = $data[1];
+                        $coureur->birth_date = $data[4];
+                        $coureur->idgender = $genre->id;
+                        $coureur->idequipe = $equipe->id;
+                        $coureur->idetape = $etape->id;
+                        $coureur->heure_arrive = $data[6];
+                        $coureur->save();
+                    }
+                }
+            }
+
+            return redirect()->back()->with('success', 'Importation du fichier CSV réussie.');
+        }
+
+        return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
+    }
+
+    // public function importResultat(Request $request)
+    // {
+    //     // Vérifier si un fichier CSV a été envoyé
+    //     if ($request->hasFile('csv_file')) {
+    //         $file = $request->file('csv_file');
+
+    //         // Vérifier si le fichier est un CSV
+    //         if ($file->getClientOriginalExtension() === 'csv') {
+    //             // Ouvrir le fichier en mode lecture
+    //             $handle = fopen($file->path(), 'r');
+
+    //             // Ignorer la première ligne (en-tête)
+    //             fgetcsv($handle, 0, ';');
+
+    //             // Lire les données restantes
+    //             while (($data = fgetcsv($handle, 0, ';')) !== false) {
+    //                 if (count($data) < 7) {
+    //                     Log::warning('Ligne invalide : ' . implode(';', $data));
+    //                     continue;
+    //                 }
+
+    //                 // Extraire les données de la ligne
+    //                 $etapeRang = (int)$data[0];
+    //                 $dossardNumber = (int)$data[1];
+    //                 $nom = $data[2];
+    //                 $genreName = $data[3];
+    //                 $birthDate = \DateTime::createFromFormat('d/m/Y', $data[4])->format('Y-m-d');
+    //                 $equipeName = $data[5];
+    //                 $arrivalTime = \DateTime::createFromFormat('d/m/Y H:i:s', $data[6])->format('Y-m-d H:i:s');
+
+    //                 // Vérifier ou créer le genre
+    //                 $genre = Genres::firstOrCreate(['name' => $genreName]);
+
+    //                 // Vérifier ou créer l'équipe
+    //                 $equipe = Equipes::firstOrCreate(['name' => $equipeName]);
+
+    //                 // Vérifier ou créer le coureur
+    //                 $coureur = Coureurs::firstOrCreate(
+    //                     ['dossard_number' => $dossardNumber],
+    //                     [
+    //                         'name' => $nom,
+    //                         'gender' => $genreName,
+    //                         'birth_date' => $birthDate,
+    //                         'idequipe' => $equipe->id
+    //                     ]
+    //                 );
+
+    //                 // Vérifier ou créer l'étape
+    //                 $etape = Etapes::firstOrCreate(
+    //                     ['rang' => $etapeRang],
+    //                     [
+    //                         'name' => 'Etape ' . $etapeRang, // Assuming a default name for now
+    //                         'longueur' => 0, // Placeholder, replace with actual value if available
+    //                         'coureurs_per_equipe' => 0, // Placeholder, replace with actual value if available
+    //                         'datedepart' => null, // Placeholder, replace with actual value if available
+    //                         'heure_depart' => null // Placeholder, replace with actual value if available
+    //                     ]
+    //                 );
+
+    //                 // Insérer le temps d'arrivée dans la table chronos
+    //                 Chronos::create([
+    //                     'idetape' => $etape->id,
+    //                     'idcoureur' => $coureur->id,
+    //                     'heure_arrivee' => $arrivalTime,
+    //                     // Add other relevant fields if necessary
+    //                 ]);
+
+    //                 // Log the inserted data
+    //                 Log::info('Données insérées : ', [
+    //                     'etape_rang' => $etapeRang,
+    //                     'dossard_number' => $dossardNumber,
+    //                     'nom' => $nom,
+    //                     'genre' => $genreName,
+    //                     'birth_date' => $birthDate,
+    //                     'equipe' => $equipeName,
+    //                     'arrival_time' => $arrivalTime,
+    //                 ]);
+    //             }
+
+    //             // Fermer le fichier
+    //             fclose($handle);
+
+    //             return redirect()->back()->with('success', 'Importation CSV réussie.');
+    //         } else {
+    //             return redirect()->back()->with('error', 'Le fichier doit être au format CSV.');
+    //         }
+    //     }
+
+    //     return redirect()->back()->with('error', 'Aucun fichier CSV n\'a été envoyé.');
+    // }
+
+    // public function importResultat(Request $request)
+    // {
+    //     // Vérifier si un fichier CSV a été envoyé
+    //     if ($request->hasFile('csv_file2')) {
+    //         $file = $request->file('csv_file2');
+
+    //         // Vérifier si le fichier est un CSV
+    //         if ($file->getClientOriginalExtension() === 'csv') {
+    //             // Récupérer le contenu du fichier CSV
+    //             $contents = file_get_contents($file->path());
+    //             $lines = explode("\n", $contents);
+
+    //             // Parcourir chaque ligne du CSV à partir de la deuxième ligne
+    //             for ($i = 1; $i < count($lines); $i++) {
+    //                 $line = $lines[$i];
+    //                 $data = explode(';', $line);
+
+    //                 // Vérifier si la ligne est valide pour la table Coureurs
+    //                 if (count($data) === 7) {
+    //                     // Vérifier et créer l'équipe si elle n'existe pas
+    //                     $equipe = Equipes::firstOrCreate(['name' => $data[5]]);
+
+    //                     // Vérifier et créer le genre si celui-ci n'existe pas
+    //                     $genre = Genres::firstOrCreate(['name' => $data[3]]);
+
+    //                     // Vérifier si le rang de l'étape existe dans la table Etapes
+    //                     $etape = Etapes::firstOrCreate(['rang' => $data[0]])->first();
+    //                     if ($etape) {
+    //                         // Créer un nouvel enregistrement dans la table Coureurs
+    //                         $coureur = new Coureurs();
+    //                         $coureur->idetape = $etape->id;
+    //                         $coureur->dossard_number = $data[1];
+    //                         $coureur->name = $data[2];
+    //                         $coureur->idgenre = $genre->id;
+    //                         $coureur->birth_date = $data[4];
+    //                         $coureur->idequipe = $equipe->id;
+    //                         $coureur->arrive = $data[6];
+    //                         $coureur->save();
+    //                     } else {
+    //                         return redirect()->back()->with('error', 'Le rang de l\'étape n\'existe pas.');
+    //                     }
+    //                 }
+    //             }
+
+    //             return redirect()->back()->with('success', 'Importation du deuxième fichier CSV réussie.');
+    //         } else {
+    //             return redirect()->back()->with('error', 'Le fichier 2 doit être au format CSV.');
+    //         }
+    //     }
+
+    //     return redirect()->back()->with('error', 'Aucun fichier 2 CSV n\'a été envoyé.');
+    // }
 }

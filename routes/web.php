@@ -32,6 +32,10 @@ Route::get('/etape_assignment', [MyController::class, 'etape_assignment'])->name
 Route::get('/insert', [MyController::class, 'insert'])->name('insert');
 Route::get('/chrono', [MyController::class, 'showChrono'])->name('showChrono');
 Route::get('/point', [MyController::class, 'point'])->name('point');
+Route::get('/import', [MyController::class, 'import'])->name('import');
+Route::get('/importresult', [MyController::class, 'importresult'])->name('importresult');
 Route::post('/importPoint', [MyController::class, 'importPoint'])->name('importPoint');
+Route::post('/importEtape', [MyController::class, 'importEtape'])->name('importEtape');
+Route::post('/importResultat', [MyController::class, 'importResultat'])->name('importResultat');
 Route::get('/affecter-temps/{idetape}/{idcoureur}', [MyController::class, 'showAffecterTempsForm'])->name('showAffecterTempsForm');
 Route::post('/affecter-temps', [MyController::class, 'affecterTemps'])->name('affecterTemps');

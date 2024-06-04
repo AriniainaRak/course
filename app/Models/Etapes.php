@@ -15,10 +15,12 @@ class Etapes extends Model
         'name',
         'longueur',
         'coureur_per_equipe',
-        'rang'
+        'rang',
+        'datedepart',
+        'heure_depart'
     ];
 
-    public function coureurs()
+    public function coureur()
     {
         return $this->belongsToMany(Coureurs::class, 'etape_assignments', 'idetape', 'idcoureur');
     }

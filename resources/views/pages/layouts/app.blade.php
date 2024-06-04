@@ -93,6 +93,18 @@
                             <div data-i18n="Analytics">Import points</div>
                         </a>
                     </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/import" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Import etapes</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/importresult" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Import resultats</div>
+                        </a>
+                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->
