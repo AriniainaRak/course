@@ -135,8 +135,8 @@ create table classements(
     idcoureur int,
     classement int,
     idetape int,
-    foreign key (idcoureur) coureurs(id),
-    foreign key (idetape) etapes(id)
+    foreign key (idcoureur)references coureurs(id),
+    foreign key (idetape) references etapes(id)
 );
 
 drop view detail_resultat;

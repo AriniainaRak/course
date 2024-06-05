@@ -132,8 +132,10 @@ class MyController extends Controller
             if ($request->password == $user->password) {
                 # code...
                 Session::put('loginId', $user->id);
+                $detail_etape = DB::table('course_detail')->where('id_equipe','=',$user->id)->get();
                 $data = [
-                    'equipe'=>$user
+                    'equipe'=>$user,
+                    'etape'=>$detail_etape
                 ];
                 return view('pages/equipe',compact('data'));
             } else {
@@ -318,12 +320,24 @@ class MyController extends Controller
     }
     public function etape_assignment()
     {
+        $id = Session::get('loginId');
         $data = [
             'etape_assignments' => Etape_assignments::all(),
             'etape' => Etapes::all(),
-            'coureur' => Coureurs::all()
+            'coureur' => Coureurs::where('idequipe','=',$id)->get()
         ];
         return view('pages.etape_assignment', compact('data'));
+    }
+
+    public function lesCoureurs(Request $request)
+    {
+        $id_etape = $request['idetape'];
+        $id = Session::get('loginId');
+        $data = [
+            'coureurs'=>DB::table('course_detail')->where('id_equipe','=',$id)->where('idetape','=',$id_etape)->get()
+        ];
+        // print($data['coureurs']);
+        return view('pages/listeEtapeCoureurs',compact('data'));
     }
 
     public function resetDatabase(Request $request)

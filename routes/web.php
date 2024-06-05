@@ -49,3 +49,4 @@ Route::get('/classement_general', [MyController::class, 'classement_generale'])-
 Route::get('/equipe/{id}', 'MyController@show')->name('equipe.details');
 Route::get('/etapepdf', [MyController::class, 'generatePdf']);
 Route::get('/classement/pdf/{idetape}', [MyController::class, 'generatePdf']);
+Route::get('/lesCoureurs', [MyController::class, 'lesCoureurs']);

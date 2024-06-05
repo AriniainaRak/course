@@ -22,7 +22,7 @@ active
                     <td>{{ $travaux->longueur }}</td>
                     <td>{{ $travaux->coureurs_per_equipe }}</td>
                     <td>{{ $travaux->rang }}</td>
-                    {{-- <td><a href="{{ route('detaillistedevis', ['idTypeMaison' => $travaux->idtype_maison]) }}">Detail</a> --}}
+                    <td><a href="/lesCoureurs?idetape={{ $travaux->id }}">Les coureurs</a>
                     </td>
                 </tr>
                 @endforeach
