@@ -329,6 +329,31 @@ class MyController extends Controller
         return view('pages.etape_assignment', compact('data'));
     }
 
+    public function stat(Request $request)
+    {
+
+        return view('pages.admin');
+    }
+
+    public function classement_equipe()
+    {
+        $data = [];
+
+        $donnees = DB::table('classement_equipe')->get();
+        // print($donnees);
+        if (!empty($donnees)) {
+            foreach ($donnees as $item) {
+                $a = [
+                    "equipe" => $item->equipe_nom,
+                    "points" => $item->total_points
+                ];
+                array_push($data, $a);
+            }
+            print_r($data);
+        }
+        return response()->json($data);
+    }
+
     public function lesCoureurs(Request $request)
     {
         $id_etape = $request['idetape'];

@@ -50,3 +50,5 @@ Route::get('/equipe/{id}', 'MyController@show')->name('equipe.details');
 Route::get('/etapepdf', [MyController::class, 'generatePdf']);
 Route::get('/classement/pdf/{idetape}', [MyController::class, 'generatePdf']);
 Route::get('/lesCoureurs', [MyController::class, 'lesCoureurs']);
+Route::get('/stat', [MyController::class, 'stat']);
+Route::get('/classement_equipe', [MyController::class, 'classement_equipe']);

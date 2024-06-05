@@ -2,7 +2,6 @@
 
 <html lang="en" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('admin/assets/') }}" data-template="vertical-menu-template-free">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport"
@@ -106,7 +105,7 @@
                         </a>
                     </li>
                     <li class="menu-item @yield('dash')">
-                        <a href="/listepenalty" class="menu-link">
+                        <a href="/penalty" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Ajout penalité</div>
                         </a>
@@ -115,6 +114,12 @@
                         <a href="/classement_general" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Analytics">Classement generale</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @yield('dash')">
+                        <a href="/stat" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <div data-i18n="Analytics">Statistique</div>
                         </a>
                     </li>
                 </ul>
