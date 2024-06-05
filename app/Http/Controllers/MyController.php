@@ -132,7 +132,10 @@ class MyController extends Controller
             if ($request->password == $user->password) {
                 # code...
                 Session::put('loginId', $user->id);
-                return view('pages/equipe');
+                $data = [
+                    'equipe'=>$user
+                ];
+                return view('pages/equipe',compact('data'));
             } else {
                 return back()->with('fail', 'Mot de passe incorrect');
             }

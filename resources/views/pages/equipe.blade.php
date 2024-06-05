@@ -1,4 +1,6 @@
 @extends('pages.layouts.userapp')
-@auth
-    {{ Auth::user()->name}}
-@endauth
+@section('contenue')
+    <div class="card">
+        <p>Bienvenue a l'equipe {{ $data['equipe']->name }}</p>
+    </div>
+@endsection

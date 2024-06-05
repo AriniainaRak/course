@@ -1,4 +1,4 @@
--- Active: 1716373515129@@127.0.0.1@5432@course
+-- Active: 1717405712043@@127.0.0.1@5432@course
 -- Table pour les admins
 CREATE TABLE admins (
     id  SERIAL PRIMARY KEY,
@@ -105,7 +105,7 @@ create table points (
     points int
 );
 
-create table genre(
+create table genres(
     id serial PRIMARY KEY NOT NULL,
     name varchar(255)
 );
